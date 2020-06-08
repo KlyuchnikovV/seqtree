@@ -60,7 +60,7 @@ loop:
 	return nil
 }
 
-func (tree *SequentialAVLTree) getNode(position int) *Node {
+func (tree *SequentialAVLTree) GetNode(position int) *Node {
 	if tree.size == 0 || position < 0 || position > tree.size {
 		return nil
 	}
@@ -83,7 +83,7 @@ func (tree *SequentialAVLTree) getNode(position int) *Node {
 }
 
 func (tree *SequentialAVLTree) Find(position int) (interface{}, bool) {
-	node := tree.getNode(position)
+	node := tree.GetNode(position)
 	if node == nil {
 		return nil, false
 	}
