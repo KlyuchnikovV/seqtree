@@ -70,14 +70,15 @@ func (tree *SequentialAVLTree) GetNode(position int) *Node {
 	for node != nil {
 		switch {
 		case position < currentPos:
-			node = (*node).rightChild
-			currentPos = node.getPosition(currentPos, false)
-		case position > currentPos:
 			node = (*node).leftChild
 			currentPos = node.getPosition(currentPos, true)
-		default:
-			break
+			continue
+		case position > currentPos:
+			node = (*node).rightChild
+			currentPos = node.getPosition(currentPos, false)
+			continue
 		}
+		break
 	}
 	return node
 }
