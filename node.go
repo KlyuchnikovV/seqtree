@@ -18,6 +18,10 @@ func newNode(data interface{}) *Node {
 	}
 }
 
+func (n *Node) SetData(data interface{}) {
+	n.data = data
+}
+
 func (n Node) Data() interface{} {
 	return n.data
 }
