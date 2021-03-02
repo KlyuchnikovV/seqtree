@@ -123,12 +123,19 @@ func (tree *SequentialAVLTree) Delete(position int) (interface{}, bool) {
 	result := node.data
 
 	if node.HasRight() {
-		replacingNode := node.rightChild
+
+		var (
+			parentNode    = node
+			replacingNode = node.rightChild
+		)
 		for replacingNode.HasLeft() {
+			parentNode = replacingNode
 			replacingNode.numberOfChildren--
 			replacingNode = replacingNode.leftChild
 		}
+		parentNode.leftChild = nil
 		replacingNode.leftChild = node.leftChild
+
 		if node.rightChild != replacingNode {
 			replacingNode.rightChild = node.rightChild
 		}
