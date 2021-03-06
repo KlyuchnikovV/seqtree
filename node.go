@@ -94,8 +94,6 @@ func (n *Node) rotateRight() {
 
 	n.rightChild.fixNumberOfChildren()
 	n.fixNumberOfChildren()
-
-	return
 }
 
 func (n *Node) rotateLeft() {
@@ -110,8 +108,6 @@ func (n *Node) rotateLeft() {
 
 	n.leftChild.fixNumberOfChildren()
 	n.fixNumberOfChildren()
-
-	return
 }
 
 func (n *Node) fixNumberOfChildren() {

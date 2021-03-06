@@ -133,7 +133,9 @@ func (tree *SequentialAVLTree) Delete(position int) (interface{}, bool) {
 			replacingNode.numberOfChildren--
 			replacingNode = replacingNode.leftChild
 		}
-		parentNode.leftChild = nil
+		if parentNode != node {
+			parentNode.leftChild = nil
+		}
 		replacingNode.leftChild = node.leftChild
 
 		if node.rightChild != replacingNode {
