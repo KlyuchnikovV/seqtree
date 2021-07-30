@@ -1,10 +1,10 @@
 package seqtree
 
 import (
-	"github.com/stretchr/testify/assert"
-	"math"
 	"math/rand"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSequentialAILTree_SequentialInsert(t *testing.T) {
@@ -14,6 +14,7 @@ func TestSequentialAILTree_SequentialInsert(t *testing.T) {
 		assert.NoError(t, tree.Insert(i, i))
 	}
 	assert.Equal(t, 100000, tree.Size())
+	tree.Find(0)
 }
 
 func TestSequentialAVLTree_RandomInsert(t *testing.T) {
@@ -26,21 +27,23 @@ func TestSequentialAVLTree_RandomInsert(t *testing.T) {
 	assert.Equal(t, 100000, tree.Size())
 }
 
-func TestSequentialAVLTree_ToList(t *testing.T) {
-	t.Parallel()
-	tree := new(SequentialAVLTree)
+// func TestSequentialAVLTree_ToList(t *testing.T) {
+// 	t.Parallel()
+// 	tree := new(SequentialAVLTree)
 
-	for i := 0; i < 8; i++ {
-		assert.NoError(t, tree.Insert(i, i))
-		assert.Equal(t, i+1, tree.size)
-		assert.Equal(t, i+1, tree.root.numberOfChildren+1)
-	}
+// 	for i := 0; i < 8; i++ {
+// 		assert.NoError(t, tree.Insert(i, i))
+// 		assert.Equal(t, i+1, tree.size)
+// 		assert.Equal(t, i+1, tree.root.NumberOfChildren()+1)
+// 	}
 
-	lines := tree.ToList()
-	for i, line := range lines {
-		assert.Equal(t, i, line.(int))
-	}
-}
+// 	// tree.Delete(4)
+
+// 	lines := tree.ToList()
+// 	for i, line := range lines {
+// 		assert.Equal(t, i, line.(int))
+// 	}
+// }
 
 func TestSequentialAVLTree_Delete(t *testing.T) {
 	t.Parallel()
@@ -60,13 +63,6 @@ func TestSequentialAVLTree_Delete(t *testing.T) {
 	}
 	for _, value := range values {
 		assert.True(t, value)
-	}
-}
-
-func TestLog2(t *testing.T) {
-	t.Parallel()
-	for i := 0; i < 1000000; i++ {
-		assert.Equal(t, int(math.Log2(float64(i))), log2(i), "failed on %d", i)
 	}
 }
 

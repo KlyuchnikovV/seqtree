@@ -3,88 +3,97 @@ package seqtree
 import (
 	"fmt"
 
+	"github.com/KlyuchnikovV/seqtree/node"
 	"github.com/KlyuchnikovV/stack"
 )
 
 type SequentialAVLTree struct {
-	root *Node
+	root *node.Node
 	size int
 }
 
 func New(data interface{}) *SequentialAVLTree {
 	return &SequentialAVLTree{
-		root: newNode(data),
+		root: node.New(data),
 		size: 1,
 	}
 }
 
-func (tree *SequentialAVLTree) Insert(data interface{}, position int) error {
+func (tree *SequentialAVLTree) Insert(position int, data interface{}) error {
 	if position > tree.size || position < 0 {
 		return fmt.Errorf("position \"%d\" is out of tree range: [%d - %d]", position, 0, tree.size+1)
 	}
+
 	tree.size++
+
 	if tree.root == nil {
-		tree.root = &Node{data: data}
+		tree.root = node.New(data)
 		return nil
 	}
 
-	node := tree.root
-	nodeStack := stack.New(tree.root.height())
-	currentPosition := node.getPosition(-1, false)
+	var (
+		currentNode     = tree.root
+		nodeStack       = stack.New(currentNode.Height())
+		currentPosition = currentNode.Position(-1, false)
+	)
 
+	// TODO: rework
 loop:
 	for {
-		node.numberOfChildren++
+		currentNode.SetNumberOfChildren(currentNode.NumberOfChildren() + 1)
 		switch {
-		case currentPosition >= position && node.HasLeft():
-			nodeStack.Push(node)
-			node = node.leftChild
-			currentPosition = node.getPosition(currentPosition, true)
-		case currentPosition < position && node.HasRight():
-			nodeStack.Push(node)
-			node = node.rightChild
-			currentPosition = node.getPosition(currentPosition, false)
-		case currentPosition >= position && !node.HasLeft():
-			node.leftChild = &Node{data: data}
+		case currentPosition >= position && currentNode.HasLeft():
+			nodeStack.Push(currentNode)
+			currentNode = currentNode.LeftChild()
+			currentPosition = currentNode.Position(currentPosition, true)
+		case currentPosition < position && currentNode.HasRight():
+			nodeStack.Push(currentNode)
+			currentNode = currentNode.RightChild()
+			currentPosition = currentNode.Position(currentPosition, false)
+		case currentPosition >= position && !currentNode.HasLeft():
+			currentNode.SetLeftChild(node.New(data))
 			break loop
-		case currentPosition < position && !node.HasRight():
-			node.rightChild = &Node{data: data}
+		case currentPosition < position && !currentNode.HasRight():
+			currentNode.SetRightChild(node.New(data))
 			break loop
 		}
 	}
 
 	for v, ok := nodeStack.Pop(); ok; v, ok = nodeStack.Pop() {
-		v.(*Node).balance()
+		v.(*node.Node).BalanceTree()
 	}
 
 	return nil
 }
 
-func (tree *SequentialAVLTree) GetNode(position int) *Node {
+func (tree *SequentialAVLTree) GetNode(position int) *node.Node {
 	if tree.size == 0 || position < 0 || position > tree.size {
 		return nil
 	}
-	node := tree.root
-	currentPos := node.getPosition(-1, false)
 
-	for node != nil {
+	var (
+		currentNode     = tree.root
+		currentPosition = currentNode.Position(-1, false)
+	)
+
+	for currentNode != nil {
 		switch {
-		case position < currentPos:
-			node = (*node).leftChild
-			currentPos = node.getPosition(currentPos, true)
+		case position < currentPosition:
+			currentNode = (*currentNode).LeftChild()
+			currentPosition = currentNode.Position(currentPosition, true)
 			continue
-		case position > currentPos:
-			node = (*node).rightChild
-			currentPos = node.getPosition(currentPos, false)
+		case position > currentPosition:
+			currentNode = (*currentNode).RightChild()
+			currentPosition = currentNode.Position(currentPosition, false)
 			continue
 		}
 		break
 	}
-	return node
+	return currentNode
 }
 
 func (tree *SequentialAVLTree) Find(position int) (interface{}, bool) {
-	node := tree.GetNode(position)
+	var node = tree.GetNode(position)
 	if node == nil {
 		return nil, false
 	}
@@ -95,78 +104,80 @@ func (tree *SequentialAVLTree) Size() int {
 	return tree.size
 }
 
-func (tree *SequentialAVLTree) ToList() []interface{} {
-	return tree.root.toList()
-}
-
 func (tree *SequentialAVLTree) Delete(position int) (interface{}, bool) {
 	if position >= tree.size || position < 0 {
 		return nil, false
 	}
 
-	node := tree.root
-	nodeStack := stack.New(tree.root.height())
-	currentPosition := node.getPosition(-1, false)
+	var (
+		currentNode     = tree.root
+		nodeStack       = stack.New(currentNode.Height())
+		currentPosition = currentNode.Position(-1, false)
+	)
 
 	for currentPosition != position {
-		node.numberOfChildren--
-		nodeStack.Push(node)
+		currentNode.SetNumberOfChildren(currentNode.NumberOfChildren() - 1)
+		nodeStack.Push(currentNode)
 		if currentPosition > position {
-			node = node.leftChild
-			currentPosition = node.getPosition(currentPosition, true)
+			currentNode = currentNode.LeftChild()
+			currentPosition = currentNode.Position(currentPosition, true)
 		} else if currentPosition < position {
-			node = node.rightChild
-			currentPosition = node.getPosition(currentPosition, false)
+			currentNode = currentNode.RightChild()
+			currentPosition = currentNode.Position(currentPosition, false)
 		}
 	}
 
-	result := node.data
+	var result = currentNode.Data()
 
-	if node.HasRight() {
+	if currentNode.HasRight() {
 
 		var (
-			parentNode    = node
-			replacingNode = node.rightChild
+			parentNode    = currentNode
+			replacingNode = currentNode.RightChild()
 		)
 		for replacingNode.HasLeft() {
 			parentNode = replacingNode
-			replacingNode.numberOfChildren--
-			replacingNode = replacingNode.leftChild
+			replacingNode.SetNumberOfChildren(replacingNode.NumberOfChildren() - 1)
+			replacingNode = replacingNode.LeftChild()
 		}
-		if parentNode != node {
-			parentNode.leftChild = nil
+		if parentNode != currentNode {
+			parentNode.SetLeftChild(nil)
 		}
-		replacingNode.leftChild = node.leftChild
+		replacingNode.SetLeftChild(currentNode.LeftChild())
 
-		if node.rightChild != replacingNode {
-			replacingNode.rightChild = node.rightChild
+		if currentNode.RightChild() != replacingNode {
+			replacingNode.SetRightChild(currentNode.RightChild())
 		}
-		*node = *replacingNode
-		node.fixNumberOfChildren()
-	} else if !node.HasLeft() {
+		*currentNode = *replacingNode
+		currentNode.FixNumberOfChildren()
+	} else if !currentNode.HasLeft() {
 		v, ok := nodeStack.Peek()
 		if !ok {
 			tree.root = nil
-		} else if node.IsLeftOf(*v.(*Node)) {
-			v.(*Node).leftChild = nil
+		} else if currentNode.IsLeftOf(*v.(*node.Node)) {
+			v.(*node.Node).SetLeftChild(nil)
 		} else {
-			v.(*Node).rightChild = nil
+			v.(*node.Node).SetRightChild(nil)
 		}
 	} else {
-		*node = *node.leftChild
+		*currentNode = *currentNode.LeftChild()
 	}
 
 	for v, ok := nodeStack.Pop(); ok; v, ok = nodeStack.Pop() {
-		v.(*Node).balance()
+		v.(*node.Node).BalanceTree()
 	}
 
 	tree.size--
 	return result, true
 }
 
-func (tree *SequentialAVLTree) Visualize() {
-	if tree.root == nil {
-		return
-	}
-	tree.root.visualizeNodeSubtree(0, tree.root.height())
-}
+// func (tree *SequentialAVLTree) ToList() []interface{} {
+// 	return tree.root.toList()
+// }
+
+// func (tree *SequentialAVLTree) Visualize() {
+// 	if tree.root == nil {
+// 		return
+// 	}
+// 	tree.root.visualizeNodeSubtree(0, tree.root.height())
+// }
