@@ -12,61 +12,25 @@ func New(data interface{}) *Node {
 	}
 }
 
-func (n *Node) SetData(data interface{}) {
-	n.data = data
-}
+/* Node's setters */
 
-func (n Node) Data() interface{} {
-	return n.data
-}
+func (n *Node) SetData(data interface{})    { n.data = data }
+func (n *Node) SetLeftChild(left *Node)     { n.leftChild = left }
+func (n *Node) SetRightChild(right *Node)   { n.rightChild = right }
+func (n *Node) SetNumberOfChildren(num int) { n.numberOfChildren = num }
 
-func (n Node) LeftChild() *Node {
-	return n.leftChild
-}
+/* Node's getters */
 
-func (n *Node) SetLeftChild(left *Node) {
-	n.leftChild = left
-}
-
-func (n Node) RightChild() *Node {
-	return n.rightChild
-}
-
-func (n *Node) SetRightChild(right *Node) {
-	n.rightChild = right
-}
-
-func (n Node) HasLeft() bool {
-	return n.leftChild != nil
-}
-
-func (n Node) HasRight() bool {
-	return n.rightChild != nil
-}
-
-func (n *Node) IsLeftOf(parent Node) bool {
-	return parent.leftChild == n
-}
-
-func (n *Node) IsRightOf(parent Node) bool {
-	return parent.rightChild == n
-}
-
-func (n Node) NumberOfChildren() int {
-	return n.numberOfChildren
-}
-
-func (n *Node) SetNumberOfChildren(num int) {
-	n.numberOfChildren = num
-}
-
-func (n Node) IsLeaf() bool {
-	return n.leftChild == nil && n.rightChild == nil
-}
-
-func (n Node) Height() int {
-	return 1 + log2(n.numberOfChildren+1)
-}
+func (n Node) Data() interface{}           { return n.data }
+func (n Node) Height() int                 { return 1 + log2(n.numberOfChildren+1) }
+func (n Node) IsLeaf() bool                { return n.leftChild == nil && n.rightChild == nil }
+func (n Node) HasLeft() bool               { return n.leftChild != nil }
+func (n Node) HasRight() bool              { return n.rightChild != nil }
+func (n Node) LeftChild() *Node            { return n.leftChild }
+func (n Node) RightChild() *Node           { return n.rightChild }
+func (n Node) NumberOfChildren() int       { return n.numberOfChildren }
+func (n *Node) IsLeftOf(parent Node) bool  { return parent.leftChild == n }
+func (n *Node) IsRightOf(parent Node) bool { return parent.rightChild == n }
 
 // TODO: rework
 func (n Node) Position(prevPosition int, goingLeft bool) int {
