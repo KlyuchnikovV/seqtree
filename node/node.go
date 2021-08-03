@@ -28,9 +28,15 @@ func (n Node) HasLeft() bool               { return n.leftChild != nil }
 func (n Node) HasRight() bool              { return n.rightChild != nil }
 func (n Node) LeftChild() *Node            { return n.leftChild }
 func (n Node) RightChild() *Node           { return n.rightChild }
-func (n Node) NumberOfChildren() int       { return n.numberOfChildren }
 func (n *Node) IsLeftOf(parent Node) bool  { return parent.leftChild == n }
 func (n *Node) IsRightOf(parent Node) bool { return parent.rightChild == n }
+
+func (n *Node) NumberOfChildren() int {
+	if n == nil {
+		return 0
+	}
+	return n.numberOfChildren
+}
 
 // TODO: rework
 func (n Node) Position(prevPosition int, goingLeft bool) int {
@@ -44,6 +50,48 @@ func (n Node) Position(prevPosition int, goingLeft bool) int {
 		return prevPosition + n.leftChild.numberOfChildren + 2
 	}
 	return prevPosition + 1
+}
+
+func (n *Node) ExctactPrev() *Node {
+	if !n.HasLeft() {
+		return nil
+	}
+
+	var (
+		node   = n.leftChild
+		parent = n
+	)
+	parent.numberOfChildren--
+	for node.HasRight() {
+		parent = node
+		parent.numberOfChildren--
+		node = node.rightChild
+	}
+	if parent.HasRight() {
+		parent.rightChild = nil
+	}
+	return node
+}
+
+func (n *Node) ExctactNext() *Node {
+	if !n.HasRight() {
+		return nil
+	}
+
+	var (
+		node = n.rightChild
+		parent = n
+	)
+	parent.numberOfChildren--
+	for node.HasLeft() {
+		parent = node
+		parent.numberOfChildren--
+		node = node.leftChild
+	}
+	if parent.HasLeft() {
+		parent.leftChild = nil
+	}
+	return node
 }
 
 // func (n Node) toList() []interface{} {

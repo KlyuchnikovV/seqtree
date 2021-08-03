@@ -8,11 +8,12 @@ import (
 )
 
 type SequentialAVLTree struct {
-	root *node.Node
-	size int
+	useNew bool
+	root   *node.Node
+	size   int
 }
 
-func New(data interface{}) *SequentialAVLTree {
+func New(data interface{}, useNew bool) *SequentialAVLTree {
 	return &SequentialAVLTree{
 		root: node.New(data),
 		size: 1,
@@ -38,7 +39,7 @@ func (tree *SequentialAVLTree) Insert(position int, data interface{}) error {
 	)
 
 	// TODO: rework
-loop:
+	// loop:
 	for {
 		currentNode.SetNumberOfChildren(currentNode.NumberOfChildren() + 1)
 		switch {
@@ -46,24 +47,23 @@ loop:
 			nodeStack.Push(currentNode)
 			currentNode = currentNode.LeftChild()
 			currentPosition = currentNode.Position(currentPosition, true)
+			continue
 		case currentPosition < position && currentNode.HasRight():
 			nodeStack.Push(currentNode)
 			currentNode = currentNode.RightChild()
 			currentPosition = currentNode.Position(currentPosition, false)
+			continue
 		case currentPosition >= position && !currentNode.HasLeft():
 			currentNode.SetLeftChild(node.New(data))
-			break loop
+			// break loop
 		case currentPosition < position && !currentNode.HasRight():
 			currentNode.SetRightChild(node.New(data))
-			break loop
+			// break loop
 		}
+		break
 	}
 
-	for v, ok := nodeStack.Pop(); ok; v, ok = nodeStack.Pop() {
-		v.(*node.Node).BalanceTree()
-	}
-
-	return nil
+	return tree.Balance()
 }
 
 func (tree *SequentialAVLTree) GetNode(position int) *node.Node {
@@ -104,72 +104,72 @@ func (tree *SequentialAVLTree) Size() int {
 	return tree.size
 }
 
-func (tree *SequentialAVLTree) Delete(position int) (interface{}, bool) {
-	if position >= tree.size || position < 0 {
-		return nil, false
-	}
+// func (tree *SequentialAVLTree) Delete(position int) (interface{}, bool) {
+// 	if position >= tree.size || position < 0 {
+// 		return nil, false
+// 	}
 
-	var (
-		currentNode     = tree.root
-		nodeStack       = stack.New(currentNode.Height())
-		currentPosition = currentNode.Position(-1, false)
-	)
+// 	var (
+// 		currentNode     = tree.root
+// 		nodeStack       = stack.New(currentNode.Height())
+// 		currentPosition = currentNode.Position(-1, false)
+// 	)
 
-	for currentPosition != position {
-		currentNode.SetNumberOfChildren(currentNode.NumberOfChildren() - 1)
-		nodeStack.Push(currentNode)
-		if currentPosition > position {
-			currentNode = currentNode.LeftChild()
-			currentPosition = currentNode.Position(currentPosition, true)
-		} else if currentPosition < position {
-			currentNode = currentNode.RightChild()
-			currentPosition = currentNode.Position(currentPosition, false)
-		}
-	}
+// 	for currentPosition != position {
+// 		currentNode.SetNumberOfChildren(currentNode.NumberOfChildren() - 1)
+// 		nodeStack.Push(currentNode)
+// 		if currentPosition > position {
+// 			currentNode = currentNode.LeftChild()
+// 			currentPosition = currentNode.Position(currentPosition, true)
+// 		} else if currentPosition < position {
+// 			currentNode = currentNode.RightChild()
+// 			currentPosition = currentNode.Position(currentPosition, false)
+// 		}
+// 	}
 
-	var result = currentNode.Data()
+// 	var result = currentNode.Data()
 
-	if currentNode.HasRight() {
+// 	if currentNode.HasRight() {
 
-		var (
-			parentNode    = currentNode
-			replacingNode = currentNode.RightChild()
-		)
-		for replacingNode.HasLeft() {
-			parentNode = replacingNode
-			replacingNode.SetNumberOfChildren(replacingNode.NumberOfChildren() - 1)
-			replacingNode = replacingNode.LeftChild()
-		}
-		if parentNode != currentNode {
-			parentNode.SetLeftChild(nil)
-		}
-		replacingNode.SetLeftChild(currentNode.LeftChild())
+// 		var (
+// 			parentNode    = currentNode
+// 			replacingNode = currentNode.RightChild()
+// 		)
+// 		for replacingNode.HasLeft() {
+// 			parentNode = replacingNode
+// 			replacingNode.SetNumberOfChildren(replacingNode.NumberOfChildren() - 1)
+// 			replacingNode = replacingNode.LeftChild()
+// 		}
+// 		if parentNode != currentNode {
+// 			parentNode.SetLeftChild(nil)
+// 		}
+// 		replacingNode.SetLeftChild(currentNode.LeftChild())
 
-		if currentNode.RightChild() != replacingNode {
-			replacingNode.SetRightChild(currentNode.RightChild())
-		}
-		*currentNode = *replacingNode
-		currentNode.FixNumberOfChildren()
-	} else if !currentNode.HasLeft() {
-		v, ok := nodeStack.Peek()
-		if !ok {
-			tree.root = nil
-		} else if currentNode.IsLeftOf(*v.(*node.Node)) {
-			v.(*node.Node).SetLeftChild(nil)
-		} else {
-			v.(*node.Node).SetRightChild(nil)
-		}
-	} else {
-		*currentNode = *currentNode.LeftChild()
-	}
+// 		if currentNode.RightChild() != replacingNode {
+// 			replacingNode.SetRightChild(currentNode.RightChild())
+// 		}
+// 		*currentNode = *replacingNode
+// 		currentNode.FixNumberOfChildren()
+// 	} else if !currentNode.HasLeft() {
+// 		v, ok := nodeStack.Peek()
+// 		if !ok {
+// 			tree.root = nil
+// 		} else if currentNode.IsLeftOf(*v.(*node.Node)) {
+// 			v.(*node.Node).SetLeftChild(nil)
+// 		} else {
+// 			v.(*node.Node).SetRightChild(nil)
+// 		}
+// 	} else {
+// 		*currentNode = *currentNode.LeftChild()
+// 	}
 
-	for v, ok := nodeStack.Pop(); ok; v, ok = nodeStack.Pop() {
-		v.(*node.Node).BalanceTree()
-	}
+// 	for v, ok := nodeStack.Pop(); ok; v, ok = nodeStack.Pop() {
+// 		v.(*node.Node).BalanceTree()
+// 	}
 
-	tree.size--
-	return result, true
-}
+// 	tree.size--
+// 	return result, true
+// }
 
 // func (tree *SequentialAVLTree) ToList() []interface{} {
 // 	return tree.root.toList()
@@ -181,3 +181,69 @@ func (tree *SequentialAVLTree) Delete(position int) (interface{}, bool) {
 // 	}
 // 	tree.root.visualizeNodeSubtree(0, tree.root.height())
 // }
+
+func (tree *SequentialAVLTree) Balance() error {
+	if tree.root == nil {
+		return nil
+	}
+	if !tree.root.HasLeft() && !tree.root.HasRight() {
+		return nil
+	}
+
+	var (
+		root          = tree.root
+		leftChildren  = root.LeftChild().NumberOfChildren()
+		rightChildren = root.RightChild().NumberOfChildren()
+		position      = root.Position(-1, false)
+	)
+
+	if leftChildren == rightChildren {
+		return nil
+	}
+
+	if leftChildren > rightChildren {
+		// удалить самую правую из левого
+		var prev = root.ExctactPrev()
+		tree.size--
+		// поставить рутом
+		tree.root = prev
+		// if tree.root.HasLeft() {
+		// 	panic("left")
+		// }
+		if tree.root != root.LeftChild() {
+			tree.root.SetLeftChild(root.LeftChild())
+		}
+		if tree.root.HasRight() {
+			// предыдущая для корня нода не может иметь правого
+			panic("right")
+		}
+		root.SetLeftChild(nil)
+		root.SetRightChild(nil)
+		// вставить в самое левое правого
+		return tree.Insert(position+1, root.Data())
+	} else {
+		// удалить самую левую из правого
+		var prev = root.ExctactNext()
+		tree.size--
+		// поставить рутом
+		tree.root = prev
+		if tree.root.HasLeft() {
+			// предыдущая для корня нода не может иметь левого
+			panic("left")
+		}
+		tree.root.SetLeftChild(root.LeftChild())
+		// if tree.root.HasRight() {
+		// 	panic("right")
+		// }
+		if tree.root != root.RightChild() {
+			tree.root.SetRightChild(root.RightChild())
+		}
+		root.SetLeftChild(nil)
+		root.SetRightChild(nil)
+		// вставить в самое правое левого
+		if position == 0 {
+			position = 1
+		}
+		return tree.Insert(position-1, root.Data())
+	}
+}
