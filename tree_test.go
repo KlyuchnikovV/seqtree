@@ -10,7 +10,7 @@ import (
 func TestSequentialAVLTree_SequentialInsert(t *testing.T) {
 	t.Parallel()
 	tree := new(SequentialAVLTree)
-	for i := 0; i < 100000; i++ {
+	for i := 1; i <= 100000; i++ {
 		assert.NoError(t, tree.Insert(i, i))
 	}
 	assert.Equal(t, 100000, tree.Size())
@@ -18,9 +18,9 @@ func TestSequentialAVLTree_SequentialInsert(t *testing.T) {
 }
 
 func TestSequentialAVLTree_RandomInsert(t *testing.T) {
-	// t.Parallel()
+	t.Parallel()
 	tree := new(SequentialAVLTree)
-	for i := 0; i < 100000; i++ {
+	for i := 1; i <= 100000; i++ {
 		r := rand.Intn(tree.Size() + 1)
 		assert.NoError(t, tree.Insert(r, r))
 	}
@@ -31,13 +31,13 @@ func TestSequentialAVLTree_RandomInsert(t *testing.T) {
 // 	t.Parallel()
 // 	tree := new(SequentialAVLTree)
 
-// 	for i := 0; i < 8; i++ {
+// 	for i := 1; i <= 8; i++ {
 // 		assert.NoError(t, tree.Insert(i, i))
-// 		assert.Equal(t, i+1, tree.size)
-// 		assert.Equal(t, i+1, tree.root.NumberOfChildren()+1)
+// 		assert.Equal(t, i, tree.size)
+// 		assert.Equal(t, i, tree.root.NumberOfChildren()+1)
 // 	}
 
-// 	// tree.Delete(4)
+// 	tree.Delete(4)
 
 // 	lines := tree.ToList()
 // 	for i, line := range lines {
@@ -50,14 +50,13 @@ func TestSequentialAVLTree_RandomInsert(t *testing.T) {
 // 	tree := new(SequentialAVLTree)
 // 	values := make(map[int]bool)
 
-// 	for i := 0; i < 10; i++ {
+// 	for i := 1; i <= 10; i++ {
 // 		assert.NoError(t, tree.Insert(i, i))
 // 		values[i] = false
 // 	}
 
 // 	for tree.Size() > 0 {
-// 		data, ok := tree.Delete(rand.Intn(tree.Size()))
-// 		assert.True(t, ok)
+// 		data := tree.Delete(rand.Intn(tree.Size()))
 // 		assert.False(t, values[data.(int)])
 // 		values[data.(int)] = true
 // 	}
@@ -69,17 +68,7 @@ func TestSequentialAVLTree_RandomInsert(t *testing.T) {
 func BenchmarkSequentialInsertingIntoTree(b *testing.B) {
 	for i := 0; i <= b.N; i++ {
 		tree := new(SequentialAVLTree)
-		for j := 0; j < 100000; j++ {
-			_ = tree.Insert(j, j)
-		}
-	}
-}
-
-func BenchmarkSequentialInsertingIntoTreeNew(b *testing.B) {
-	for i := 0; i <= b.N; i++ {
-		tree := new(SequentialAVLTree)
-		tree.useNew = true
-		for j := 0; j < 100000; j++ {
+		for j := 1; j <= 100000; j++ {
 			_ = tree.Insert(j, j)
 		}
 	}
@@ -88,17 +77,7 @@ func BenchmarkSequentialInsertingIntoTreeNew(b *testing.B) {
 func BenchmarkRandomInsertingIntoTree(b *testing.B) {
 	for i := 0; i <= b.N; i++ {
 		tree := new(SequentialAVLTree)
-		for j := 0; j < 100000; j++ {
-			_ = tree.Insert(j, rand.Intn(tree.Size()+1))
-		}
-	}
-}
-
-func BenchmarkRandomInsertingIntoTreeNew(b *testing.B) {
-	for i := 0; i <= b.N; i++ {
-		tree := new(SequentialAVLTree)
-		tree.useNew = true
-		for j := 0; j < 100000; j++ {
+		for j := 1; j <= 100000; j++ {
 			_ = tree.Insert(j, rand.Intn(tree.Size()+1))
 		}
 	}
@@ -107,7 +86,7 @@ func BenchmarkRandomInsertingIntoTreeNew(b *testing.B) {
 // func BenchmarkRandomInsertingDeleting(b *testing.B) {
 // 	for i := 0; i <= b.N; i++ {
 // 		tree := new(SequentialAVLTree)
-// 		for j := 0; j < 100000; j++ {
+// 		for j := 1; j <= 100000; j++ {
 // 			if rand.Intn(1) == 1 || tree.size == 0 {
 // 				_ = tree.Insert(j, rand.Intn(tree.Size()+1))
 // 			} else {
@@ -117,21 +96,21 @@ func BenchmarkRandomInsertingIntoTreeNew(b *testing.B) {
 // 	}
 // }
 
-// func BenchmarkSequentialInsertSlice(b *testing.B) {
-// 	for i := 0; i <= b.N; i++ {
-// 		var slice []interface{}
-// 		for j := 0; j < 100000; j++ {
-// 			slice = append(slice, j)
-// 		}
-// 	}
-// }
+func BenchmarkSequentialInsertSlice(b *testing.B) {
+	for i := 0; i <= b.N; i++ {
+		var slice []interface{}
+		for j := 1; j <= 100000; j++ {
+			slice = append(slice, j)
+		}
+	}
+}
 
-// func BenchmarkRandomInsertSlice(b *testing.B) {
-// 	for i := 0; i <= b.N; i++ {
-// 		var slice []interface{}
-// 		for j := 0; j < 100000; j++ {
-// 			pos := rand.Intn(len(slice) + 1)
-// 			slice = append(append(slice[:pos], j), slice[pos:]...)
-// 		}
-// 	}
-// }
+func BenchmarkRandomInsertSlice(b *testing.B) {
+	for i := 0; i <= b.N; i++ {
+		var slice []interface{}
+		for j := 1; j <= 100000; j++ {
+			pos := rand.Intn(len(slice) + 1)
+			slice = append(append(slice[:pos], j), slice[pos:]...)
+		}
+	}
+}

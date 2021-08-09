@@ -39,17 +39,11 @@ func (n *Node) NumberOfChildren() int {
 }
 
 // TODO: rework
-func (n Node) Position(prevPosition int, goingLeft bool) int {
-	if goingLeft {
-		if n.rightChild != nil {
-			return prevPosition - n.rightChild.numberOfChildren - 2
-		}
-		return prevPosition - 1
+func (n Node) Position() int {
+	if n.leftChild == nil {
+		return 1
 	}
-	if n.leftChild != nil {
-		return prevPosition + n.leftChild.numberOfChildren + 2
-	}
-	return prevPosition + 1
+	return n.leftChild.numberOfChildren + 2
 }
 
 func (n *Node) ExctactPrev() *Node {
@@ -67,7 +61,9 @@ func (n *Node) ExctactPrev() *Node {
 		parent.numberOfChildren--
 		node = node.rightChild
 	}
-	if parent.HasRight() {
+	if parent == n {
+		parent.leftChild = nil
+	} else if parent.HasRight() {
 		parent.rightChild = nil
 	}
 	return node
@@ -79,7 +75,7 @@ func (n *Node) ExctactNext() *Node {
 	}
 
 	var (
-		node = n.rightChild
+		node   = n.rightChild
 		parent = n
 	)
 	parent.numberOfChildren--
@@ -88,24 +84,26 @@ func (n *Node) ExctactNext() *Node {
 		parent.numberOfChildren--
 		node = node.leftChild
 	}
-	if parent.HasLeft() {
+	if parent == n {
+		parent.rightChild = nil
+	} else if parent.HasLeft() {
 		parent.leftChild = nil
 	}
 	return node
 }
 
-// func (n Node) toList() []interface{} {
-// 	var result = make([]interface{}, 0, n.numberOfChildren+1)
+func (n Node) ToList() []interface{} {
+	var result = make([]interface{}, 0, n.numberOfChildren+1)
 
-// 	if n.leftChild != nil {
-// 		result = n.leftChild.toList()
-// 	}
-// 	result = append(result, n.data)
-// 	if n.rightChild != nil {
-// 		result = append(result, n.rightChild.toList()...)
-// 	}
-// 	return result
-// }
+	if n.leftChild != nil {
+		result = n.leftChild.ToList()
+	}
+	result = append(result, n.data)
+	if n.rightChild != nil {
+		result = append(result, n.rightChild.ToList()...)
+	}
+	return result
+}
 
 // func (n Node) visualizeNodeSubtree(currentLevel, treeHeight int) {
 // 	if n.leftChild != nil {

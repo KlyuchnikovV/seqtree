@@ -1,6 +1,6 @@
 package node
 
-func (n *Node) BalanceTree() {
+func (n *Node) Balance() {
 	switch n.getBalance() {
 	case 2:
 		if n.rightChild.getBalance() < 0 {
